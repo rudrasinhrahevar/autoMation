@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Admin | Reports</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="stylesheet" href="../assets/css/theme.css"/>
+
+<style>
+  body {
+    background-color: #0b0f17;
+    color: var(--text);
+    font-family: "Inter", sans-serif;
+  }
+
+  .navbar {
+    background: rgba(11, 15, 23, 0.95);
+    border-bottom: 1px solid rgba(0,255,247,.15);
+    backdrop-filter: blur(8px);
+  }
+
+  .navbar .navbar-brand {
+    color: var(--neon);
+    font-weight: 600;
+  }
+
+  .navbar .nav-link {
+    color: var(--muted);
+  }
+
+  .navbar .nav-link.active {
+    color: var(--neon);
+  }
+
+  .btn-neon {
+    background: var(--neon);
+    color: #000;
+    border: none;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .btn-neon:hover {
+    background: rgba(0,255,247,.85);
+  }
+
+  .btn-outline-neon {
+    border: 1px solid var(--neon);
+    color: var(--neon);
+    background: transparent;
+  }
+
+  .btn-outline-neon:hover {
+    background: var(--neon);
+    color: #000;
+  }
+
+  .card {
+    background: rgba(0,255,247,.05);
+    border: 1px solid rgba(0,255,247,.15);
+    border-radius: 12px;
+    color: var(--text);
+    transition: all 0.3s ease;
+  }
+
+  .card:hover {
+    box-shadow: 0 4px 20px rgba(0,255,247,.12);
+    transform: translateY(-2px);
+  }
+
+  h5 {
+    color: var(--neon);
+    font-weight: 600;
+  }
+
+  footer {
+    border-top: 1px solid rgba(0,255,247,.1);
+    text-align: center;
+    color: var(--muted);
+    padding: 1rem 0;
+  }
+
+  .fade-in {
+    animation: fadeIn 0.6s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from {opacity: 0; transform: translateY(10px);}
+    to {opacity: 1; transform: translateY(0);}
+  }
+
+  canvas {
+    background: transparent;
+  }
+
+  .highlight-list li {
+    margin-bottom: .6rem;
+    color: var(--text);
+  }
+
+  .highlight-list li::before {
+    content: "• ";
+    color: var(--neon);
+  }
+
+  .table thead th {
+    color: var(--neon);
+    border-bottom: 1px solid rgba(0,255,247,.3);
+  }
+
+  .table tbody td {
+    color: var(--text);
+  }
+</style>
+</head>
+
+<body class="d-flex flex-column min-vh-100 fade-in">
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg sticky-top">
+  <div class="container-fluid">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link" href="index.html">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="users.html">Users</a></li>
+        <li class="nav-item"><a class="nav-link" href="projects.html">Projects</a></li>
+        <li class="nav-item"><a class="nav-link active" href="reports.html">Reports</a></li>
+        <li class="nav-item"><a class="nav-link" href="settings.html">Settings</a></li>
+      </ul>
+        <button id="logoutBtn" class="btn btn-sm btn-outline-neon">
+          <i data-lucide="log-out"></i> Logout
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="flex-fill container py-4">
+  <script>requireRole('admin');</script>
+
+  <!-- PAGE HEADER -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-semibold text-neon">Performance Reports</h3>
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-neon btn-sm" onclick="window.print()">
+        <i data-lucide="printer"></i> Print
+      </button>
+      <button class="btn btn-outline-neon btn-sm" onclick="downloadReport()">
+        <i data-lucide="download"></i> Export
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI CHARTS SECTION -->
+  <div class="row g-4">
+    <div class="col-12 col-xl-8">
+      <div class="card p-4">
+        <h5 class="mb-3">Monthly Efficiency</h5>
+        <canvas id="effChart" height="160"></canvas>
+      </div>
+    </div>
+    <div class="col-12 col-xl-4">
+      <div class="card p-4">
+        <h5 class="mb-3">Highlights</h5>
+        <ul class="highlight-list mb-0">
+          <li>MTBF increased by <strong>12%</strong></li>
+          <li>Deployment time reduced by <strong>18%</strong></li>
+          <li>Support SLA achieved <strong>98.2%</strong></li>
+          <li>Automation uptime at <strong>99.6%</strong></li>
+          <li>Client satisfaction improved <strong>+9%</strong></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEPARTMENT PERFORMANCE -->
+  <div class="card p-4 mt-4">
+    <h5 class="mb-3">Department Productivity</h5>
+    <canvas id="deptChart" height="140"></canvas>
+  </div>
+
+  <!-- SUMMARY TABLE -->
+  <div class="card p-4 mt-4">
+    <h5 class="mb-3">Quarterly Summary</h5>
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Q1</th>
+            <th>Q2</th>
+            <th>Q3</th>
+            <th>Q4</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Projects Completed</td><td>12</td><td>15</td><td>18</td><td>20</td></tr>
+          <tr><td>Average Lead Time (days)</td><td>42</td><td>38</td><td>33</td><td>31</td></tr>
+          <tr><td>Support Tickets Resolved</td><td>320</td><td>410</td><td>450</td><td>480</td></tr>
+          <tr><td>System Uptime</td><td>99.2%</td><td>99.5%</td><td>99.6%</td><td>99.8%</td></tr>
+          <tr><td>Customer Satisfaction</td><td>89%</td><td>91%</td><td>93%</td><td>94%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<footer>© 2025 AutoLogic Automation Portal</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/ui.js"></script>
+
+<script>
+if(window.lucide) lucide.createIcons();
+
+// Chart 1 - Efficiency
+const effCtx = document.getElementById('effChart');
+if(effCtx){
+  new Chart(effCtx,{
+    type:'line',
+    data:{
+      labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep'],
+      datasets:[{
+        label:'Efficiency (%)',
+        data:[75,78,82,85,87,90,92,94,96],
+        borderColor:'#00fff7',
+        backgroundColor:'rgba(0,255,247,0.1)',
+        tension:0.4,
+        fill:true,
+        pointRadius:4,
+        pointHoverRadius:6
+      }]
+    },
+    options:{
+      scales:{
+        x:{ticks:{color:'#9ca3af'},grid:{color:'rgba(0,255,247,.05)'}},
+        y:{ticks:{color:'#9ca3af'},grid:{color:'rgba(0,255,247,.05)'}}
+      },
+      plugins:{legend:{labels:{color:'#00fff7'}}}
+    }
+  });
+}
+
+// Chart 2 - Department Productivity
+const deptCtx = document.getElementById('deptChart');
+if(deptCtx){
+  new Chart(deptCtx,{
+    type:'bar',
+    data:{
+      labels:['Engineering','Production','Support','QA','Admin'],
+      datasets:[{
+        label:'Tasks Completed',
+        data:[180,230,160,140,120],
+        backgroundColor:'rgba(0,255,247,0.6)',
+        borderColor:'#00fff7',
+        borderWidth:1.2
+      }]
+    },
+    options:{
+      scales:{
+        x:{ticks:{color:'#9ca3af'},grid:{display:false}},
+        y:{ticks:{color:'#9ca3af'},grid:{color:'rgba(0,255,247,.05)'}}
+      },
+      plugins:{legend:{labels:{color:'#00fff7'}}}
+    }
+  });
+}
+
+// Theme Toggle
+document.getElementById('themeBtn')?.addEventListener('click',function(){
+  const icon = this.querySelector('i');
+  const isMoon = icon.getAttribute('data-lucide')==='moon';
+  icon.setAttribute('data-lucide',isMoon?'sun':'moon');
+  document.body.classList.toggle('light');
+  if(window.lucide) lucide.createIcons();
+});
+
+// Logout Button
+document.getElementById('logoutBtn')?.addEventListener('click',function(){
+  Swal.fire({
+    icon:'warning',
+    title:'Confirm Logout',
+    text:'Are you sure you want to log out?',
+    showCancelButton:true,
+    confirmButtonText:'Logout',
+    background:'#0b0f17',
+    color:'#00fff7'
+  }).then(result=>{
+    if(result.isConfirmed){ logout(); }
+  });
+});
+
+// Export Report (Dummy)
+function downloadReport(){
+  Swal.fire({
+    icon:'success',
+    title:'Report Exported',
+    text:'Your detailed report has been generated and downloaded.',
+    background:'#0b0f17',
+    color:'#00fff7'
+  });
+}
+</script>
+</body>
+</html>

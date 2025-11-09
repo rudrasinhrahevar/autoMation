@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin | Notifications</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../assets/css/theme.css" />
+
+  <style>
+    main.container { padding-top:1.25rem; padding-bottom:3.5rem; }
+    .panel { background: var(--panel); border:1px solid rgba(0,255,247,.06); border-radius:12px; padding:1rem; box-shadow:0 6px 18px rgba(0,255,247,.03); }
+    .notif { display:flex; gap:.75rem; align-items:flex-start; padding:.75rem; border-radius:10px; border-bottom:1px dashed rgba(255,255,255,.02); }
+    .notif.unread { background: rgba(0,255,247,.03); }
+    .notif .meta { font-size:.85rem; color:var(--muted); }
+    .actions .btn { border-radius:999px; padding:.35rem .6rem; font-size:.85rem; }
+    .search-wrap { display:flex; gap:.5rem; align-items:center; }
+    footer.site-footer { margin-top:2rem; text-align:center; color:var(--muted); font-size:.85rem; padding:.6rem 0; }
+  </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+  <!-- NAVBAR (unchanged) -->
+  <nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container-fluid">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="index.html">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="users.html">Users</a></li>
+          <li class="nav-item"><a class="nav-link" href="projects.html">Projects</a></li>
+          <li class="nav-item"><a class="nav-link" href="reports.html">Reports</a></li>
+          <li class="nav-item"><a class="nav-link" href="settings.html">Settings</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-sm btn-neon" onclick="logout()"><i data-lucide="log-out"></i> Logout</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container flex-fill">
+    <script>if(typeof requireRole === 'function') requireRole('admin');</script>
+
+    <div class="d-flex flex-column">
+  <div class="mb-2">
+    <button class="btn btn-sm btn-outline-neon" onclick="window.history.back()">
+      <i data-lucide="arrow-left"></i> Back
+    </button>
+  </div>
+  <div>
+    <h2 class="mb-0 neon">Notifications</h2>
+    <small class="text-muted">Manage alerts, announcements and system messages</small>
+  </div>
+</div>
+
+
+      <div class="d-flex gap-2 align-items-center">
+        <div class="search-wrap">
+          <span class="input-group-text bg-transparent border-secondary"><i data-lucide="search"></i></span>
+          <input id="notifSearch" class="form-control form-control-sm bg-transparent text-white border-secondary" placeholder="Search notifications...">
+        </div>
+        <button id="markAllRead" class="btn btn-compact btn-outline-neon btn-sm">Mark all read</button>
+        <button id="clearAll" class="btn btn-compact btn-outline-danger btn-sm">Clear all</button>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-lg-8">
+        <div class="panel mb-3">
+          <div id="notificationsList" class="list-group list-group-flush"></div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="panel mb-3">
+          <h6 class="mb-2 neon">Filters</h6>
+          <div class="d-grid gap-2">
+            <button class="btn btn-outline-neon" onclick="filterType('all')">All</button>
+            <button class="btn btn-outline-neon" onclick="filterType('alerts')">Alerts</button>
+            <button class="btn btn-outline-neon" onclick="filterType('info')">Info</button>
+            <button class="btn btn-outline-neon" onclick="filterType('deploy')">Deploy</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h6 class="mb-2">Stats</h6>
+          <div class="d-flex justify-content-between">
+            <div>
+              <div class="text-muted">Unread</div>
+              <div class="neon fw-bold" id="unreadCount">0</div>
+            </div>
+            <div>
+              <div class="text-muted">Total</div>
+              <div class="neon fw-bold" id="totalCount">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="site-footer">© 2025 AutoLogic Automation Portal</footer>
+  </main>
+
+  <!-- scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/ui.js"></script>
+
+  <script>
+    if (window.lucide) lucide.createIcons();
+
+    // demo notifications (persist in localStorage for interactivity)
+    const STORAGE_KEY = 'admin_notifications_v2';
+    const seed = [
+      {id:1,type:'deploy',title:'Deployment succeeded','text':'Release v1.2 deployed to staging','time':'2h', unread:true},
+      {id:2,type:'alerts',title:'High CPU','text':'CPU > 90% on server-3','time':'1h', unread:true},
+      {id:3,type:'info',title:'New user','text':'acme_corp registered','time':'Today', unread:false},
+      {id:4,type:'deploy',title:'Rollback','text':'Rollback performed on release/1.2.0','time':'Yesterday', unread:false}
+    ];
+
+    function load() {
+      let list = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (!list) { list = seed; localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); }
+      return list;
+    }
+    function save(list) { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); }
+
+    function render(filter='all', q='') {
+      const container = document.getElementById('notificationsList');
+      const list = load().filter(n => (filter==='all' || n.type===filter) && (q==='' || (n.title + n.text).toLowerCase().includes(q)));
+      container.innerHTML = '';
+      if (!list.length) { container.innerHTML = '<div class="text-muted p-3">No notifications</div>'; updateCounts(); return; }
+      list.forEach(n => {
+        const item = document.createElement('div');
+        item.className = 'notif ' + (n.unread ? 'unread' : '');
+        item.innerHTML = `
+          <div class="d-flex w-100 justify-content-between align-items-start">
+            <div class="d-flex gap-3">
+              <div class="text-muted"><i data-lucide="${n.type==='alerts'?'alert-triangle':n.type==='deploy'?'zap':'info'}"></i></div>
+              <div>
+                <div class="fw-semibold">${n.title}</div>
+                <div class="meta">${n.text}</div>
+              </div>
+            </div>
+            <div class="text-end">
+              <div class="meta small text-muted">${n.time}</div>
+              <div class="mt-2 d-flex gap-1 justify-content-end">
+                <button class="btn btn-sm btn-outline-neon" onclick="toggleRead(${n.id})">${n.unread ? 'Mark read' : 'Unread'}</button>
+                <button class="btn btn-sm btn-outline-danger" onclick="remove(${n.id})">Dismiss</button>
+              </div>
+            </div>
+          </div>`;
+        container.appendChild(item);
+      });
+      if (window.lucide) lucide.createIcons();
+      updateCounts();
+    }
+
+    function updateCounts() {
+      const list = load();
+      document.getElementById('totalCount').textContent = list.length;
+      document.getElementById('unreadCount').textContent = list.filter(x => x.unread).length;
+    }
+
+    function toggleRead(id) {
+      const list = load();
+      const idx = list.findIndex(x => x.id===id);
+      if (idx>-1) { list[idx].unread = !list[idx].unread; save(list); render(currentFilter, currentQuery); }
+    }
+    function remove(id) {
+      let list = load();
+      list = list.filter(x => x.id!==id);
+      save(list); render(currentFilter, currentQuery);
+    }
+    function filterType(t) { currentFilter = t; render(currentFilter, currentQuery); }
+    document.getElementById('markAllRead')?.addEventListener('click', () => {
+      let list = load().map(i=>({...i, unread:false})); save(list); render(currentFilter, currentQuery);
+    });
+    document.getElementById('clearAll')?.addEventListener('click', () => {
+      if (!confirm('Clear all notifications?')) return;
+      save([]); render(currentFilter, currentQuery);
+    });
+    document.getElementById('notifSearch')?.addEventListener('input', function() {
+      currentQuery = this.value.trim().toLowerCase(); render(currentFilter, currentQuery);
+    });
+
+    let currentFilter = 'all', currentQuery = '';
+    document.addEventListener('DOMContentLoaded', () => render('all',''));
+  </script>
+</body>
+</html>

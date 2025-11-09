@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin | Users</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../assets/css/theme.css" />
+
+  <style>
+    .card {
+      background: var(--panel);
+      border: 1px solid rgba(0, 255, 247, .12);
+      border-radius: 14px;
+      color: var(--text);
+    }
+
+    .table {
+      background: transparent !important;
+      color: var(--text) !important;
+    }
+
+    .table thead th {
+      background: #0b0f17 !important;
+      color: var(--neon) !important;
+      border-bottom: 2px solid rgba(0, 255, 247, .25);
+    }
+
+    .table tbody td {
+      background: #0b0f17 !important;
+      color: var(--text) !important;
+      border-top: 1px solid rgba(0, 255, 247, .1);
+    }
+
+    .table-hover tbody tr:hover td {
+      background: rgba(0, 255, 247, .08) !important;
+    }
+
+    .badge {
+      font-size: .8rem;
+      border-radius: 10px;
+      padding: .35rem .6rem;
+    }
+
+    .badge-active {
+      background-color: rgba(0, 255, 247, 0.15);
+      color: var(--neon);
+    }
+
+    .badge-suspended {
+      background-color: rgba(255, 76, 76, 0.15);
+      color: #ff4c4c;
+    }
+
+    .btn-neon {
+      background-color: var(--neon);
+      color: #000;
+      font-weight: 600;
+    }
+
+    .btn-outline-neon {
+      border-color: var(--neon);
+      color: var(--neon);
+    }
+    .btn-neonn{
+      border: 1px solid;
+    }
+    .btn-outline-neon:hover {
+      background: var(--neon);
+      color: #000;
+    }
+
+    input, select {
+      background: #0b0f17 !important;
+      border: 1px solid rgba(0, 255, 247, .2);
+      color: var(--text) !important;
+    }
+
+    .form-control:focus {
+      box-shadow: 0 0 0 .25rem rgba(0, 255, 247, .15);
+      border-color: var(--neon);
+    }
+  </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container-fluid">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="index.html">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link active" href="users.html">Users</a></li>
+          <li class="nav-item"><a class="nav-link" href="projects.html">Projects</a></li>
+          <li class="nav-item"><a class="nav-link" href="reports.html">Reports</a></li>
+          <li class="nav-item"><a class="nav-link" href="settings.html">Settings</a></li>
+        </ul>
+          <button class="btn btn-sm btn-neonn" onclick="logout()">
+            <i data-lucide="log-out"></i> Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="container py-4 flex-fill">
+    <h2 class="neon mb-3">User Management</h2>
+
+    <!-- Top Stats -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-3"><div class="card p-3 text-center"><h6>Total Users</h6><h3 class="neon">1245</h3></div></div>
+      <div class="col-md-3"><div class="card p-3 text-center"><h6>Active</h6><h3 class="text-success">1078</h3></div></div>
+      <div class="col-md-3"><div class="card p-3 text-center"><h6>Admins</h6><h3 class="text-info">23</h3></div></div>
+      <div class="col-md-3"><div class="card p-3 text-center"><h6>Clients</h6><h3 class="text-warning">1222</h3></div></div>
+    </div>
+
+    <!-- Controls -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <input type="text" id="searchInput" class="form-control w-25" placeholder="Search users...">
+      <button class="btn btn-neonn" data-bs-toggle="modal" data-bs-target="#addUserModal">
+        <i data-lucide="user-plus"></i> Add User
+      </button>
+    </div>
+
+    <!-- Table -->
+    <div class="card p-3">
+      <table class="table table-hover align-middle mb-0" id="usersTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Last Login</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>001</td>
+            <td>JohnDoe</td>
+            <td>Admin</td>
+            <td><span class="badge badge-active">Active</span></td>
+            <td>2025-10-09 14:33</td>
+            <td>
+              <button class="btn btn-sm btn-outline-neon"><i data-lucide="edit"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(this)"><i data-lucide="trash-2"></i></button>
+            </td>
+          </tr>
+          <tr>
+            <td>001</td>
+            <td>JohnDoe</td>
+            <td>Admin</td>
+            <td><span class="badge badge-active">Active</span></td>
+            <td>2025-10-09 14:33</td>
+            <td>
+              <button class="btn btn-sm btn-outline-neon"><i data-lucide="edit"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(this)"><i data-lucide="trash-2"></i></button>
+            </td>
+          </tr>
+          <tr>
+            <td>001</td>
+            <td>JohnDoe</td>
+            <td>Admin</td>
+            <td><span class="badge badge-active">Active</span></td>
+            <td>2025-10-09 14:33</td>
+            <td>
+              <button class="btn btn-sm btn-outline-neon"><i data-lucide="edit"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(this)"><i data-lucide="trash-2"></i></button>
+            </td>
+          </tr>
+          <tr>
+            <td>001</td>
+            <td>JohnDoe</td>
+            <td>Admin</td>
+            <td><span class="badge badge-active">Active</span></td>
+            <td>2025-10-09 14:33</td>
+            <td>
+              <button class="btn btn-sm btn-outline-neon"><i data-lucide="edit"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(this)"><i data-lucide="trash-2"></i></button>
+            </td>
+          </tr>
+          <tr>
+            <td>001</td>
+            <td>JohnDoe</td>
+            <td>Admin</td>
+            <td><span class="badge badge-active">Active</span></td>
+            <td>2025-10-09 14:33</td>
+            <td>
+              <button class="btn btn-sm btn-outline-neon"><i data-lucide="edit"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(this)"><i data-lucide="trash-2"></i></button>
+            </td>
+          </tr>
+          <tr>
+            <td>001</td>
+            <td>JohnDoe</td>
+            <td>Admin</td>
+            <td><span class="badge badge-active">Active</span></td>
+            <td>2025-10-09 14:33</td>
+            <td>
+              <button class="btn btn-sm btn-outline-neon"><i data-lucide="edit"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(this)"><i data-lucide="trash-2"></i></button>
+            </td>
+          </tr>
+          <tr>
+            <td>001</td>
+            <td>JohnDoe</td>
+            <td>Admin</td>
+            <td><span class="badge badge-active">Active</span></td>
+            <td>2025-10-09 14:33</td>
+            <td>
+              <button class="btn btn-sm btn-outline-neon"><i data-lucide="edit"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(this)"><i data-lucide="trash-2"></i></button>
+            </td>
+          </tr>
+          <tr>
+            <td>001</td>
+            <td>JohnDoe</td>
+            <td>Admin</td>
+            <td><span class="badge badge-active">Active</span></td>
+            <td>2025-10-09 14:33</td>
+            <td>
+              <button class="btn btn-sm btn-outline-neon"><i data-lucide="edit"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(this)"><i data-lucide="trash-2"></i></button>
+            </td>
+          </tr>
+          <tr>
+            <td>001</td>
+            <td>JohnDoe</td>
+            <td>Admin</td>
+            <td><span class="badge badge-active">Active</span></td>
+            <td>2025-10-09 14:33</td>
+            <td>
+              <button class="btn btn-sm btn-outline-neon"><i data-lucide="edit"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(this)"><i data-lucide="trash-2"></i></button>
+            </td>
+          </tr>
+          <tr>
+            <td>001</td>
+            <td>JohnDoe</td>
+            <td>Admin</td>
+            <td><span class="badge badge-active">Active</span></td>
+            <td>2025-10-09 14:33</td>
+            <td>
+              <button class="btn btn-sm btn-outline-neon"><i data-lucide="edit"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(this)"><i data-lucide="trash-2"></i></button>
+            </td>
+          </tr>
+          <tr>
+            <td>001</td>
+            <td>JohnDoe</td>
+            <td>Admin</td>
+            <td><span class="badge badge-active">Active</span></td>
+            <td>2025-10-09 14:33</td>
+            <td>
+              <button class="btn btn-sm btn-outline-neon"><i data-lucide="edit"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(this)"><i data-lucide="trash-2"></i></button>
+            </td>
+          </tr>
+          <tr>
+            <td>001</td>
+            <td>JohnDoe</td>
+            <td>Admin</td>
+            <td><span class="badge badge-active">Active</span></td>
+            <td>2025-10-09 14:33</td>
+            <td>
+              <button class="btn btn-sm btn-outline-neon"><i data-lucide="edit"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(this)"><i data-lucide="trash-2"></i></button>
+            </td>
+          </tr>
+          <tr>
+            <td>001</td>
+            <td>JohnDoe</td>
+            <td>Admin</td>
+            <td><span class="badge badge-active">Active</span></td>
+            <td>2025-10-09 14:33</td>
+            <td>
+              <button class="btn btn-sm btn-outline-neon"><i data-lucide="edit"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(this)"><i data-lucide="trash-2"></i></button>
+            </td>
+          </tr>
+          <tr>
+            <td>001</td>
+            <td>JohnDoe</td>
+            <td>Admin</td>
+            <td><span class="badge badge-active">Active</span></td>
+            <td>2025-10-09 14:33</td>
+            <td>
+              <button class="btn btn-sm btn-outline-neon"><i data-lucide="edit"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(this)"><i data-lucide="trash-2"></i></button>
+            </td>
+          </tr>
+          <tr>
+            <td>001</td>
+            <td>JohnDoe</td>
+            <td>Admin</td>
+            <td><span class="badge badge-active">Active</span></td>
+            <td>2025-10-09 14:33</td>
+            <td>
+              <button class="btn btn-sm btn-outline-neon"><i data-lucide="edit"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(this)"><i data-lucide="trash-2"></i></button>
+            </td>
+          </tr>
+          <tr>
+            <td>001</td>
+            <td>JohnDoe</td>
+            <td>Admin</td>
+            <td><span class="badge badge-active">Active</span></td>
+            <td>2025-10-09 14:33</td>
+            <td>
+              <button class="btn btn-sm btn-outline-neon"><i data-lucide="edit"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(this)"><i data-lucide="trash-2"></i></button>
+            </td>
+          </tr>
+          <tr>
+            <td>002</td>
+            <td>JaneSmith</td>
+            <td>Client</td>
+            <td><span class="badge badge-suspended">Suspended</span></td>
+            <td>2025-10-08 10:24</td>
+            <td>
+              <button class="btn btn-sm btn-outline-neon"><i data-lucide="edit"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(this)"><i data-lucide="trash-2"></i></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="text-center py-3" style="background: rgba(0,255,247,.03); color: var(--muted);">
+    © 2025 AutoLogic Admin Portal
+  </footer>
+
+  <!-- Add User Modal -->
+  <div class="modal fade" id="addUserModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="background:#0b0f17; color:var(--text); border:1px solid rgba(0,255,247,.2);">
+        <div class="modal-header border-0">
+          <h5 class="modal-title">Add New User</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="addUserForm">
+            <div class="mb-3">
+              <label class="form-label">Username</label>
+              <input type="text" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Role</label>
+              <select class="form-select" required>
+                <option value="Client">Client</option>
+                <option value="Admin">Admin</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Status</label>
+              <select class="form-select" required>
+                <option value="Active">Active</option>
+                <option value="Suspended">Suspended</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-neon w-100">Save</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    if (window.lucide) lucide.createIcons();
+
+    // Live search
+    document.getElementById("searchInput").addEventListener("input", function () {
+      const value = this.value.toLowerCase();
+      document.querySelectorAll("#usersTable tbody tr").forEach(row => {
+        row.style.display = row.innerText.toLowerCase().includes(value) ? "" : "none";
+      });
+    });
+
+    // Delete user confirmation
+    function deleteUser(btn) {
+      Swal.fire({
+        title: "Are you sure?",
+        text: "This action cannot be undone.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#00fff7",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!"
+      }).then(result => {
+        if (result.isConfirmed) {
+          btn.closest("tr").remove();
+          Swal.fire("Deleted!", "User has been removed.", "success");
+        }
+      });
+    }
+  </script>
+</body>
+</html>

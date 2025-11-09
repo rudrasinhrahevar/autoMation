@@ -1,0 +1,57 @@
+
+:root{--bg:#0b0f17;--panel:#111921;--neon:#00fff7;--text:#cfeff0;--muted:#8bbec0}
+*{box-sizing:border-box}
+main{
+  flex: 1;
+}
+html,body{height:100%}
+body{background:var(--bg);color: #00fff7;font-family:Poppins,system-ui,Arial;margin:0}
+a{color:var(--neon)}
+.card, .panel{background:var(--panel);border:1px solid rgba(0,255,247,.12);border-radius:12px;box-shadow:0 6px 24px rgba(0,255,247,.04)}
+.card .table {
+  background-color: transparent !important;
+  color: var(--text) !important;
+}
+
+.card .table thead th {
+  background-color: transparent !important;
+  color: var(--neon) !important;
+  border-bottom: 1px solid rgba(0,255,247,.12);
+}
+
+.card .table tbody tr td {
+  background-color: transparent !important;
+  color: var(--text) !important;
+}
+
+.card .table-hover tbody tr:hover {
+  background-color: rgba(0,255,247,.06) !important;
+}
+
+.navbar{background:transparent!important;border-bottom:1px solid rgba(0,255,247,.06);backdrop-filter:blur(3px)}
+.navbar .nav-link{color:var(--neon)!important;font-weight:500}
+.navbar .nav-link:hover,.navbar .nav-link.active{background:var(--neon);color:#0b0f17!important;border-radius:6px}
+.btn-neon{border:1px solid var(--neon);color:var(--neon);background:transparent;border-radius:8px;padding:.45rem .75rem}
+.btn-neon:hover{background:var(--neon);color:#0b0f17}
+.form-control,.form-select{background:#0f1820;border:1px solid rgba(0,255,247,.12);color:var(--text)}
+.form-control:focus,.form-select:focus{border-color:var(--neon);box-shadow:0 0 0 .2rem rgba(0,255,247,.08)}
+footer{background:rgba(0,255,247,.03);color:var(--muted);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1030;}
+  main{
+    padding-bottom: 70px;
+  }
+.small-muted{color:var(--muted)}
+.table thead th{border-bottom:1px solid rgba(0,255,247,.08)}
+.badge-neon{background:rgba(0,255,247,.12);color:var(--neon);border:1px solid rgba(0,255,247,.18);padding:.35rem .5rem;border-radius:.5rem}
+@media (max-width:575px){
+  .navbar .nav-link{padding:.35rem .5rem;font-size:.95rem}
+  .btn-neon{padding:.35rem .6rem}
+}
+
+.themed-body { background-color: #00fff7; color: #f5f5f5; }
+
+* { color: #00fff7 !important; }
