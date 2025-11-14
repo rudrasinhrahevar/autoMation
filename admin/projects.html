@@ -206,16 +206,44 @@
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <form id="newProjectForm">
-          <div class="mb-3"><label class="form-label">Project Name</label><input type="text" class="form-control" id="projName" required></div>
-          <div class="mb-3"><label class="form-label">Client</label><input type="text" class="form-control" id="projClient" required></div>
-          <div class="mb-3"><label class="form-label">Stage</label>
-            <select id="projStage" class="form-select">
-              <option>Design</option><option>Build</option><option>Review</option><option>Complete</option>
-            </select></div>
-          <div class="mb-3"><label class="form-label">Owner</label><input type="text" class="form-control" id="projOwner" required></div>
-          <div class="mb-3"><label class="form-label">ETA</label><input type="text" class="form-control" id="projETA" required></div>
-        </form>
+        <form id="newProjectForm" novalidate>
+  <div class="mb-3">
+    <label class="form-label">Project Name</label>
+    <input type="text" class="form-control" id="projName" required>
+    <div class="invalid-feedback">Project name is required.</div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Client</label>
+    <input type="text" class="form-control" id="projClient" required>
+    <div class="invalid-feedback">Client name is required.</div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Stage</label>
+    <select id="projStage" class="form-select" required>
+      <option value="">Select Stage</option>
+      <option>Design</option>
+      <option>Build</option>
+      <option>Review</option>
+      <option>Complete</option>
+    </select>
+    <div class="invalid-feedback">Please select a stage.</div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Owner</label>
+    <input type="text" class="form-control" id="projOwner" required>
+    <div class="invalid-feedback">Owner name is required.</div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">ETA</label>
+    <input type="text" class="form-control" id="projETA" required>
+    <div class="invalid-feedback">ETA is required.</div>
+  </div>
+</form>
+
       </div>
       <div class="modal-footer">
         <button class="btn btn-success w-100" onclick="saveProject()">Save Project</button>
@@ -228,37 +256,58 @@
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/ui.js"></script>
 <script>
-  if(window.lucide) lucide.createIcons();
+  if (window.lucide) lucide.createIcons();
 
-  function filterProjects(){
+  function filterProjects() {
     const search = document.getElementById("searchInput").value.toLowerCase();
     const stage = document.getElementById("statusFilter").value;
-    document.querySelectorAll("#projectsTable tbody tr").forEach(row=>{
-      const text=row.textContent.toLowerCase();
-      const match=text.includes(search)&&(!stage||row.children[3].textContent.includes(stage));
-      row.style.display=match?"":"none";
+    document.querySelectorAll("#projectsTable tbody tr").forEach(row => {
+      const text = row.textContent.toLowerCase();
+      const match = text.includes(search) && (!stage || row.children[3].textContent.includes(stage));
+      row.style.display = match ? "" : "none";
     });
   }
 
-  function viewProject(id){
+  function viewProject(id) {
     localStorage.setItem('viewProjectID', id);
     window.location.href = 'project-details.html';
   }
 
-  function saveProject(){
-    const name=document.getElementById("projName").value;
-    if(!name) return;
+  function saveProject() {
+    const form = document.getElementById("newProjectForm");
+
+    form.classList.remove("was-validated");
+
+    if (!form.checkValidity()) {
+      form.classList.add("was-validated");
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Missing Information',
+        text: 'Please fill in all required fields.',
+        background: '#0b0f17',
+        color: '#00fff7'
+      });
+      return;
+    }
+
+    const name = document.getElementById("projName").value;
+
     Swal.fire({
-      icon:'success',
-      title:'Project Added',
-      text:`${name} successfully created!`,
-      background:'#0b0f17',
-      color:'#00fff7'
+      icon: 'success',
+      title: 'Project Added',
+      text: `${name} successfully created!`,
+      background: '#0b0f17',
+      color: '#00fff7'
     });
-    document.getElementById("newProjectForm").reset();
+
+    form.reset();
+    form.classList.remove("was-validated");
+
     const modal = bootstrap.Modal.getInstance(document.getElementById('addProjectModal'));
     modal.hide();
   }
 </script>
+
 </body>
 </html>
